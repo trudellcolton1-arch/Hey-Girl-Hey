@@ -39,7 +39,7 @@ The home hero is a pink gradient with the logo. To use a group photo instead, ad
 
 ## Safety features (do not remove)
 
-- **Quick Exit button** (fixed, bottom-right, every page) + **double-ESC** keyboard shortcut. Uses `location.replace` so the site is removed from Back history.
+- **Double-ESC** keyboard shortcut leaves the site (floating Quick Exit button removed; it covered the panic button on phones). Uses `location.replace` so the site is removed from Back history.
 - **Hotline in the footer** of every page, plus a crisis bar on Get Help.
 - **Safe browsing section** explaining history/incognito/device safety.
 - Contact form asks "Is it safe to contact you this way?"
