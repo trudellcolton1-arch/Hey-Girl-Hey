@@ -107,6 +107,15 @@ async function sendEmail(text, a) {
 
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') { res.statusCode = 204; return res.end(); }
+  if (req.method === 'GET') {
+    // Health: which channels are configured. Booleans only, never values.
+    return json(res, 200, {
+      enabled: process.env.PANIC_ENABLED === 'true',
+      sms: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM && process.env.ALERT_SMS_TO),
+      email: !!(process.env.RESEND_API_KEY && process.env.ALERT_EMAIL_FROM && process.env.ALERT_EMAIL_TO),
+      ratelimit: process.env.UPSTASH_REDIS_REST_URL ? 'durable' : 'memory'
+    });
+  }
   if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'method' });
   if (process.env.PANIC_ENABLED !== 'true') return json(res, 503, { ok: false, error: 'disabled' });
   if (!originAllowed(req)) return json(res, 403, { ok: false, error: 'origin' });
