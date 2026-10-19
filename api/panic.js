@@ -15,6 +15,9 @@
  *   TWILIO_AUTH_TOKEN
  *   TWILIO_FROM              Your Twilio number (E.164) or Messaging Service SID (MG...)
  *   ALERT_EMAIL_TO           Comma-separated emails
+ *   ALERT_SMS_GATEWAY_TO     Optional. Carrier email-to-SMS addresses, comma-separated, e.g.
+ *                            2145550101@tmomail.net,8175550102@vtext.com,4695550103@txt.att.net
+ *                            Delivered via Resend as a short plain text. No carrier registration needed.
  *   RESEND_API_KEY           Resend credentials (domain hghey.org must be verified in Resend)
  *   ALERT_EMAIL_FROM         e.g. "HEY GIRL Alerts <alerts@hghey.org>"
  *   UPSTASH_REDIS_REST_URL   Optional. Durable rate limiting + 24h audit log.
@@ -81,6 +84,29 @@ function buildMessage(a) {
   return `HEY GIRL PANIC ALERT\n${when} CT\n${who}${phone}${loc}\n${note}Call 911 if there is immediate danger. Do not approach alone.\nAlert ID ${a.id}`;
 }
 
+function buildShortMessage(a) {
+  // Carrier gateways truncate around 160 chars. Keep it tight.
+  const loc = a.lat != null ? `https://maps.google.com/?q=${a.lat},${a.lng}` : 'no location';
+  const who = a.name ? ` ${a.name}.` : '';
+  return `HEY GIRL ALERT${who} ${loc} Call 911 if danger. ID ${a.id}`;
+}
+
+async function sendGatewaySms(a) {
+  const key = process.env.RESEND_API_KEY, from = process.env.ALERT_EMAIL_FROM;
+  const to = (process.env.ALERT_SMS_GATEWAY_TO || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (!key || !from || !to.length) return { sent: 0, skipped: true };
+  const text = buildShortMessage(a);
+  const results = await Promise.allSettled(to.map(async addr => {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: [addr], subject: '', text })
+    });
+    if (!r.ok) throw new Error(`gateway ${r.status}: ${(await r.text()).slice(0, 160)}`);
+  }));
+  const failed = results.filter(r => r.status === 'rejected').map(r => r.reason.message);
+  return { provider: 'gateway', sent: results.length - failed.length, failed };
+}
+
 async function sendSmsTelnyx(text, to) {
   const key = process.env.TELNYX_API_KEY, from = process.env.TELNYX_FROM, profile = process.env.TELNYX_PROFILE_ID;
   const results = await Promise.allSettled(to.map(async num => {
@@ -145,6 +171,7 @@ module.exports = async (req, res) => {
       enabled: process.env.PANIC_ENABLED === 'true',
       sms: smsConfigured() || false,
       email: !!(process.env.RESEND_API_KEY && process.env.ALERT_EMAIL_FROM && process.env.ALERT_EMAIL_TO),
+      gateway: !!(process.env.RESEND_API_KEY && process.env.ALERT_EMAIL_FROM && process.env.ALERT_SMS_GATEWAY_TO),
       ratelimit: process.env.UPSTASH_REDIS_REST_URL ? 'durable' : 'memory'
     });
   }
@@ -175,13 +202,13 @@ module.exports = async (req, res) => {
   };
 
   const text = buildMessage(alert);
-  const [sms, email] = await Promise.all([sendSms(text), sendEmail(text, alert)]);
-  const delivered = (sms.sent || 0) + (email.sent || 0);
+  const [sms, email, gateway] = await Promise.all([sendSms(text), sendEmail(text, alert), sendGatewaySms(alert)]);
+  const delivered = (sms.sent || 0) + (email.sent || 0) + (gateway.sent || 0);
 
   // Minimal 24h audit log (no IP, no user agent beyond the record)
-  try { await upstash(['SET', `panic:log:${alert.id}`, JSON.stringify({ ...alert, sms, email }), 'EX', 86400]); } catch {}
-  console.log(JSON.stringify({ event: 'panic', id: alert.id, hasLocation: alert.lat != null, sms, email }));
+  try { await upstash(['SET', `panic:log:${alert.id}`, JSON.stringify({ ...alert, sms, email, gateway }), 'EX', 86400]); } catch {}
+  console.log(JSON.stringify({ event: 'panic', id: alert.id, hasLocation: alert.lat != null, sms, email, gateway }));
 
-  if (!delivered) return json(res, 502, { ok: false, error: 'undelivered', id: alert.id, sms, email });
-  return json(res, 200, { ok: true, id: alert.id, sms: sms.sent, email: email.sent });
+  if (!delivered) return json(res, 502, { ok: false, error: 'undelivered', id: alert.id, sms, email, gateway });
+  return json(res, 200, { ok: true, id: alert.id, sms: sms.sent, email: email.sent, gateway: gateway.sent });
 };
