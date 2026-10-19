@@ -6,6 +6,11 @@
  * Env vars (set in Vercel → Project → Settings → Environment Variables):
  *   PANIC_ENABLED            "true" to enable. Anything else returns 503.
  *   ALERT_SMS_TO             Comma-separated E.164 numbers, e.g. +12145551234,+18175559876
+ *   SMS: Telnyx (preferred)
+ *   TELNYX_API_KEY           Telnyx API key (KEY...)
+ *   TELNYX_FROM              Your Telnyx number (E.164)
+ *   TELNYX_PROFILE_ID        Optional messaging profile id
+ *   SMS: Twilio (fallback if Telnyx vars are absent)
  *   TWILIO_ACCOUNT_SID       Twilio credentials
  *   TWILIO_AUTH_TOKEN
  *   TWILIO_FROM              Your Twilio number (E.164) or Messaging Service SID (MG...)
@@ -76,10 +81,22 @@ function buildMessage(a) {
   return `HEY GIRL PANIC ALERT\n${when} CT\n${who}${phone}${loc}\n${note}Call 911 if there is immediate danger. Do not approach alone.\nAlert ID ${a.id}`;
 }
 
-async function sendSms(text) {
+async function sendSmsTelnyx(text, to) {
+  const key = process.env.TELNYX_API_KEY, from = process.env.TELNYX_FROM, profile = process.env.TELNYX_PROFILE_ID;
+  const results = await Promise.allSettled(to.map(async num => {
+    const body = { from, to: num, text };
+    if (profile) body.messaging_profile_id = profile;
+    const r = await fetch('https://api.telnyx.com/v2/messages', {
+      method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`telnyx ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  }));
+  const failed = results.filter(r => r.status === 'rejected').map(r => r.reason.message);
+  return { provider: 'telnyx', sent: results.length - failed.length, failed };
+}
+
+async function sendSmsTwilio(text, to) {
   const sid = process.env.TWILIO_ACCOUNT_SID, tok = process.env.TWILIO_AUTH_TOKEN, from = process.env.TWILIO_FROM;
-  const to = (process.env.ALERT_SMS_TO || '').split(',').map(s => s.trim()).filter(Boolean);
-  if (!sid || !tok || !from || !to.length) return { sent: 0, skipped: true };
   const auth = Buffer.from(`${sid}:${tok}`).toString('base64');
   const results = await Promise.allSettled(to.map(async num => {
     const body = new URLSearchParams({ To: num, Body: text });
@@ -90,7 +107,22 @@ async function sendSms(text) {
     if (!r.ok) throw new Error(`twilio ${r.status}: ${(await r.text()).slice(0, 200)}`);
   }));
   const failed = results.filter(r => r.status === 'rejected').map(r => r.reason.message);
-  return { sent: results.length - failed.length, failed };
+  return { provider: 'twilio', sent: results.length - failed.length, failed };
+}
+
+function smsConfigured() {
+  const to = (process.env.ALERT_SMS_TO || '').trim();
+  if (!to) return null;
+  if (process.env.TELNYX_API_KEY && process.env.TELNYX_FROM) return 'telnyx';
+  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM) return 'twilio';
+  return null;
+}
+
+async function sendSms(text) {
+  const provider = smsConfigured();
+  if (!provider) return { sent: 0, skipped: true };
+  const to = (process.env.ALERT_SMS_TO || '').split(',').map(s => s.trim()).filter(Boolean);
+  return provider === 'telnyx' ? sendSmsTelnyx(text, to) : sendSmsTwilio(text, to);
 }
 
 async function sendEmail(text, a) {
@@ -111,7 +143,7 @@ module.exports = async (req, res) => {
     // Health: which channels are configured. Booleans only, never values.
     return json(res, 200, {
       enabled: process.env.PANIC_ENABLED === 'true',
-      sms: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM && process.env.ALERT_SMS_TO),
+      sms: smsConfigured() || false,
       email: !!(process.env.RESEND_API_KEY && process.env.ALERT_EMAIL_FROM && process.env.ALERT_EMAIL_TO),
       ratelimit: process.env.UPSTASH_REDIS_REST_URL ? 'durable' : 'memory'
     });
