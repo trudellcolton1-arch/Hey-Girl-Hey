@@ -62,7 +62,7 @@ The site installs to the home screen on iOS and Android.
 A hot pink **I Need Help Now** button under the hero. Flow: confirm sheet (with Call 911 first) → browser GPS → `POST /api/panic` → the on-call team gets an SMS and email with a Google Maps link, the girl's optional name, phone, and note, and an alert ID. The girl sees the ID, Call 911, and Leave This Site.
 
 - `api/panic.js` is a zero-dependency Vercel serverless function. SMS via Twilio, email via Resend, each enabled only when its env vars are set.
-- **Enabled in Production as of 2026-10-17 (email channel). SMS pending Twilio registration.** Until then the button shows "The alert system is not turned on yet. Call 911 now."
+- **Enabled in Production. Email via Resend; SMS via Telnyx from +1 682-626-8121 (10DLC registration pending).** Until then the button shows "The alert system is not turned on yet. Call 911 now."
 - Copy `.env.example` into Vercel → Settings → Environment Variables → Production.
 - Rate limit: 3 alerts per device per 10 minutes, 30 per hour site-wide. Durable across instances if Upstash Redis vars are set, otherwise per-instance.
 - Origin check: only hghey.org and Vercel preview domains may call the API.
