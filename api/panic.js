@@ -168,7 +168,9 @@ async function placeCall(num, a, attempt) {
   const status = new URLSearchParams({ status: '1', id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0', attempt: String(attempt), to: num });
   const body = new URLSearchParams({
     To: num, From: from, Url: callUrl(base, a, attempt), Method: 'POST', Timeout: '25',
-    MachineDetection: 'DetectMessageEnd', AsyncAmd: 'false',
+    // Async AMD: the message starts the instant the call connects; detection reports separately.
+    MachineDetection: 'Enable', AsyncAmd: 'true',
+    AsyncAmdStatusCallback: `${base}/api/voice?${status}&amd=1`, AsyncAmdStatusCallbackMethod: 'POST',
     StatusCallback: `${base}/api/voice?${status}`, StatusCallbackMethod: 'POST', StatusCallbackEvent: 'completed'
   });
   const r = await fetch(`https://api.telnyx.com/v2/texml/calls/${app}`, {
