@@ -6,6 +6,10 @@
  * Env vars (set in Vercel → Project → Settings → Environment Variables):
  *   PANIC_ENABLED            "true" to enable. Anything else returns 503.
  *   ALERT_SMS_TO             Comma-separated E.164 numbers, e.g. +12145551234,+18175559876
+ *   VOICE: Telnyx TeXML outbound calls (no 10DLC needed)
+ *   TELNYX_TEXML_APP_ID      TeXML application id
+ *   ALERT_CALL_TO            Comma-separated E.164 numbers to ring (defaults to ALERT_SMS_TO)
+ *   PUBLIC_BASE_URL          Base URL Telnyx fetches TeXML from (default https://hey-girl-hey.vercel.app)
  *   SMS: Telnyx (preferred)
  *   TELNYX_API_KEY           Telnyx API key (KEY...)
  *   TELNYX_FROM              Your Telnyx number (E.164)
@@ -151,6 +155,24 @@ async function sendSms(text) {
   return provider === 'telnyx' ? sendSmsTelnyx(text, to) : sendSmsTwilio(text, to);
 }
 
+async function sendCalls(a) {
+  const key = process.env.TELNYX_API_KEY, app = process.env.TELNYX_TEXML_APP_ID, from = process.env.TELNYX_FROM;
+  const to = (process.env.ALERT_CALL_TO || process.env.ALERT_SMS_TO || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (!key || !app || !from || !to.length) return { sent: 0, skipped: true };
+  const base = process.env.PUBLIC_BASE_URL || 'https://hey-girl-hey.vercel.app';
+  const q = new URLSearchParams({ id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0' });
+  const url = `${base}/api/voice?${q}`;
+  const results = await Promise.allSettled(to.map(async num => {
+    const body = new URLSearchParams({ To: num, From: from, Url: url, Method: 'POST', Timeout: '30' });
+    const r = await fetch(`https://api.telnyx.com/v2/texml/calls/${app}`, {
+      method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body
+    });
+    if (!r.ok) throw new Error(`call ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  }));
+  const failed = results.filter(r => r.status === 'rejected').map(r => r.reason.message);
+  return { provider: 'telnyx-voice', sent: results.length - failed.length, failed };
+}
+
 async function sendEmail(text, a) {
   const key = process.env.RESEND_API_KEY, from = process.env.ALERT_EMAIL_FROM;
   const to = (process.env.ALERT_EMAIL_TO || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -172,6 +194,7 @@ module.exports = async (req, res) => {
       sms: smsConfigured() || false,
       email: !!(process.env.RESEND_API_KEY && process.env.ALERT_EMAIL_FROM && process.env.ALERT_EMAIL_TO),
       gateway: !!(process.env.RESEND_API_KEY && process.env.ALERT_EMAIL_FROM && process.env.ALERT_SMS_GATEWAY_TO),
+      calls: !!(process.env.TELNYX_API_KEY && process.env.TELNYX_TEXML_APP_ID && process.env.TELNYX_FROM && (process.env.ALERT_CALL_TO || process.env.ALERT_SMS_TO)),
       ratelimit: process.env.UPSTASH_REDIS_REST_URL ? 'durable' : 'memory'
     });
   }
@@ -202,13 +225,13 @@ module.exports = async (req, res) => {
   };
 
   const text = buildMessage(alert);
-  const [sms, email, gateway] = await Promise.all([sendSms(text), sendEmail(text, alert), sendGatewaySms(alert)]);
-  const delivered = (sms.sent || 0) + (email.sent || 0) + (gateway.sent || 0);
+  const [sms, email, gateway, calls] = await Promise.all([sendSms(text), sendEmail(text, alert), sendGatewaySms(alert), sendCalls(alert)]);
+  const delivered = (sms.sent || 0) + (email.sent || 0) + (gateway.sent || 0) + (calls.sent || 0);
 
   // Minimal 24h audit log (no IP, no user agent beyond the record)
-  try { await upstash(['SET', `panic:log:${alert.id}`, JSON.stringify({ ...alert, sms, email, gateway }), 'EX', 86400]); } catch {}
-  console.log(JSON.stringify({ event: 'panic', id: alert.id, hasLocation: alert.lat != null, sms, email, gateway }));
+  try { await upstash(['SET', `panic:log:${alert.id}`, JSON.stringify({ ...alert, sms, email, gateway, calls }), 'EX', 86400]); } catch {}
+  console.log(JSON.stringify({ event: 'panic', id: alert.id, hasLocation: alert.lat != null, sms, email, gateway, calls }));
 
-  if (!delivered) return json(res, 502, { ok: false, error: 'undelivered', id: alert.id, sms, email, gateway });
-  return json(res, 200, { ok: true, id: alert.id, sms: sms.sent, email: email.sent, gateway: gateway.sent });
+  if (!delivered) return json(res, 502, { ok: false, error: 'undelivered', id: alert.id, sms, email, gateway, calls });
+  return json(res, 200, { ok: true, id: alert.id, sms: sms.sent, email: email.sent, gateway: gateway.sent, calls: calls.sent });
 };
