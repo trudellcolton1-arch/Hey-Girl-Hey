@@ -157,8 +157,8 @@ async function sendSms(text) {
 
 const MAX_CALL_ATTEMPTS = 3;
 
-function callUrl(base, a, attempt) {
-  const q = new URLSearchParams({ id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0', attempt: String(attempt) });
+function callUrl(base, a, attempt, to) {
+  const q = new URLSearchParams({ id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0', attempt: String(attempt), to: to || '' });
   return `${base}/api/voice?${q}`;
 }
 
@@ -167,10 +167,7 @@ async function placeCall(num, a, attempt) {
   const base = process.env.PUBLIC_BASE_URL || 'https://hey-girl-hey.vercel.app';
   const status = new URLSearchParams({ status: '1', id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0', attempt: String(attempt), to: num });
   const body = new URLSearchParams({
-    To: num, From: from, Url: callUrl(base, a, attempt), Method: 'POST', Timeout: '25',
-    // Async AMD: the message starts the instant the call connects; detection reports separately.
-    MachineDetection: 'Enable', AsyncAmd: 'true',
-    AsyncAmdStatusCallback: `${base}/api/voice?${status}&amd=1`, AsyncAmdStatusCallbackMethod: 'POST',
+    To: num, From: from, Url: callUrl(base, a, attempt, num), Method: 'POST', Timeout: '25',
     StatusCallback: `${base}/api/voice?${status}`, StatusCallbackMethod: 'POST', StatusCallbackEvent: 'completed'
   });
   const r = await fetch(`https://api.telnyx.com/v2/texml/calls/${app}`, {
