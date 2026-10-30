@@ -155,20 +155,33 @@ async function sendSms(text) {
   return provider === 'telnyx' ? sendSmsTelnyx(text, to) : sendSmsTwilio(text, to);
 }
 
+const MAX_CALL_ATTEMPTS = 3;
+
+function callUrl(base, a, attempt) {
+  const q = new URLSearchParams({ id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0', attempt: String(attempt) });
+  return `${base}/api/voice?${q}`;
+}
+
+async function placeCall(num, a, attempt) {
+  const key = process.env.TELNYX_API_KEY, app = process.env.TELNYX_TEXML_APP_ID, from = process.env.TELNYX_FROM;
+  const base = process.env.PUBLIC_BASE_URL || 'https://hey-girl-hey.vercel.app';
+  const status = new URLSearchParams({ status: '1', id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0', attempt: String(attempt), to: num });
+  const body = new URLSearchParams({
+    To: num, From: from, Url: callUrl(base, a, attempt), Method: 'POST', Timeout: '25',
+    MachineDetection: 'DetectMessageEnd', AsyncAmd: 'false',
+    StatusCallback: `${base}/api/voice?${status}`, StatusCallbackMethod: 'POST', StatusCallbackEvent: 'completed'
+  });
+  const r = await fetch(`https://api.telnyx.com/v2/texml/calls/${app}`, {
+    method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body
+  });
+  if (!r.ok) throw new Error(`call ${r.status}: ${(await r.text()).slice(0, 200)}`);
+}
+
 async function sendCalls(a) {
   const key = process.env.TELNYX_API_KEY, app = process.env.TELNYX_TEXML_APP_ID, from = process.env.TELNYX_FROM;
   const to = (process.env.ALERT_CALL_TO || process.env.ALERT_SMS_TO || '').split(',').map(s => s.trim()).filter(Boolean);
   if (!key || !app || !from || !to.length) return { sent: 0, skipped: true };
-  const base = process.env.PUBLIC_BASE_URL || 'https://hey-girl-hey.vercel.app';
-  const q = new URLSearchParams({ id: a.id, name: a.name || '', loc: a.lat != null ? '1' : '0' });
-  const url = `${base}/api/voice?${q}`;
-  const results = await Promise.allSettled(to.map(async num => {
-    const body = new URLSearchParams({ To: num, From: from, Url: url, Method: 'POST', Timeout: '30' });
-    const r = await fetch(`https://api.telnyx.com/v2/texml/calls/${app}`, {
-      method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body
-    });
-    if (!r.ok) throw new Error(`call ${r.status}: ${(await r.text()).slice(0, 200)}`);
-  }));
+  const results = await Promise.allSettled(to.map(num => placeCall(num, a, 1)));
   const failed = results.filter(r => r.status === 'rejected').map(r => r.reason.message);
   return { provider: 'telnyx-voice', sent: results.length - failed.length, failed };
 }
@@ -235,3 +248,6 @@ module.exports = async (req, res) => {
   if (!delivered) return json(res, 502, { ok: false, error: 'undelivered', id: alert.id, sms, email, gateway, calls });
   return json(res, 200, { ok: true, id: alert.id, sms: sms.sent, email: email.sent, gateway: gateway.sent, calls: calls.sent });
 };
+
+module.exports.placeCall = placeCall;
+module.exports.MAX_CALL_ATTEMPTS = MAX_CALL_ATTEMPTS;
