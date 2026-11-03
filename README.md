@@ -62,7 +62,7 @@ The site installs to the home screen on iOS and Android.
 A hot pink **I Need Help Now** button under the hero. Flow: confirm sheet (with Call 911 first) → browser GPS → `POST /api/panic` → the on-call team gets an SMS and email with a Google Maps link, the girl's optional name, phone, and note, and an alert ID. The girl sees the ID, Call 911, and Leave This Site.
 
 - `api/panic.js` is a zero-dependency Vercel serverless function. Channels, each enabled only when its env vars are set: email (Resend), SMS (Telnyx, needs 10DLC campaign approval), voice calls (Telnyx TeXML, `api/voice.js` reads the alert aloud, no carrier registration needed).
-- **Enabled in Production. Email via Resend and voice calls via Telnyx are live. SMS is configured but not yet deliverable:** the 10DLC campaign (Telnyx `4b3001a1-8e96-c562-8a71-92614797f309`, TCR `CQIR5V6`, brand `BHNX3H3` verified) passed TCR and all carriers show APPROVED, but Telnyx compliance rejected it on 2026-10-30 with code 603 ("inconsistency between brand, description, website and/or sample messages"). Fix shipped 2026-11-03: `/privacy`, `/terms`, `/sms-alerts` pages with CTIA consent language, campaign message flow rewritten to describe the real staff opt-in, and an appeal filed. Carrier email-to-SMS gateway (`ALERT_SMS_GATEWAY_TO`) is currently **unset** in Production, so until the appeal clears the on-call team gets email + calls only.
+- **Enabled in Production. Email via Resend and voice calls via Telnyx are live. SMS is configured but not yet deliverable:** the 10DLC campaign (Telnyx `4b3001a1-8e96-c562-8a71-92614797f309`, TCR `CQIR5V6`, brand `BHNX3H3` verified) passed TCR and all carriers show APPROVED, but Telnyx compliance rejected it on 2026-10-30 with code 603 ("inconsistency between brand, description, website and/or sample messages"). Fix shipped 2026-11-03: `/privacy`, `/terms`, `/sms-alerts` pages with CTIA consent language, campaign message flow, help text, samples, and policy links updated via the API, which moved the campaign to `TCR_ACCEPTED` (back in Telnyx compliance review, typically 1 to 7 business days; no separate appeal is needed or allowed in this state). Carrier email-to-SMS gateway (`ALERT_SMS_GATEWAY_TO`) is currently **unset** in Production, so until the appeal clears the on-call team gets email + calls only.
 - **When the appeal is approved** (portal: Messaging → 10DLC → Campaigns shows Approved/Active, or `GET /v2/10dlc/campaign/<id>` returns `campaignStatus: ACTIVE`), attach the number to the campaign. Nothing sends until this is done:
   ```bash
   curl -X POST https://api.telnyx.com/v2/10dlc/phone_number_campaigns -H "Authorization: Bearer $TELNYX_API_KEY" \
@@ -87,7 +87,7 @@ A hot pink **I Need Help Now** button under the hero. Flow: confirm sheet (with 
 
 ## Before launch (TODO)
 
-- [ ] Verify every phone number in the **Local Shelters & Services** block.
+- [x] Local Shelters & Services numbers verified 2026-11-03 against Dallas County DA and City of Dallas DV resource lists (Genesis 214-946-4357, The Family Place 214-941-1991, NDVH TTY 800-787-3224).
 - [ ] Replace placeholder phone `(000) 000-0000` and `@hghey.org` emails with real ones.
 - [ ] Wire the contact form (Formspree, Netlify Forms, or Supabase Edge Function).
 - [ ] Replace the Donate button href with a Stripe Payment Link.
