@@ -64,20 +64,21 @@
       <div class="container grid grid--2">
         <address class="contact-block">
           <span class="label">Contact Us</span><br>
-          <a href="mailto:hello@hghey.org">hello@hghey.org</a><br>
-          <!-- TODO: phone, PO Box -->
-          Dallas&ndash;Fort Worth, Texas
+          <strong>HEY GIRL</strong> (H.E.Y. G.I.R.L. the Movement&trade;)<br>
+          115 E Davis St<br>Duncanville, TX 75116<br>
+          <a href="tel:19728974277">(972) 897-4277</a><br>
+          <a href="mailto:hello@hghey.org">hello@hghey.org</a>
           <p class="fineprint mt">Please do not share details about your location or situation over email if you believe your accounts may be monitored.</p>
         </address>
 
         <!-- TODO: wire to Formspree / Netlify Forms / Supabase -->
         <form class="news-form" id="contact-form" action="#" method="post" novalidate>
           <div class="field"><label for="name">Name (or nickname)</label><input id="name" name="name" type="text" autocomplete="off" required></div>
-          <div class="field"><label for="email">Email or phone</label><input id="email" name="contact" type="text" autocomplete="off" required></div>
+          <div class="field"><label for="email">Email address</label><input id="email" name="contact" type="email" autocomplete="off" required><span class="fineprint">We reply by email only. We do not send text messages from this form.</span></div>
           <div class="field">
             <label for="safe">Is it safe to contact you this way?</label>
             <select id="safe" name="safe_to_contact" required>
-              <option value="">Select one</option><option value="yes">Yes</option><option value="no">No, please don't</option><option value="text-only">Text only</option><option value="email-only">Email only</option>
+              <option value="">Select one</option><option value="yes">Yes, email is safe</option><option value="no">No, please don't reply</option>
             </select>
           </div>
           <div class="field"><label for="message">How can we help?</label><textarea id="message" name="message" rows="5" required></textarea></div>
@@ -100,7 +101,7 @@
   <footer class="site-footer">
     <div class="container site-footer__inner">
       <div>
-        <p><strong>H.E.Y. G.I.R.L. the Movement&trade;</strong><br>Helping Every Young Girl in "REAL LIFE."<br>Dallas&ndash;Fort Worth, Texas</p>
+        <p><strong>HEY GIRL</strong> &middot; H.E.Y. G.I.R.L. the Movement&trade;<br>Helping Every Young Girl in "REAL LIFE."<br>115 E Davis St, Duncanville, TX 75116<br><a href="tel:19728974277">(972) 897-4277</a> &middot; <a href="mailto:hello@hghey.org">hello@hghey.org</a></p>
         <p class="fineprint"><em>"God is within her, she will not fall." Psalm 46:5</em></p>
       </div>
       <nav aria-label="Footer">
