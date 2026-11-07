@@ -1,6 +1,6 @@
 /* Hey Girl service worker. Shell cached for offline; HTML network-first; API never cached. */
-const VERSION = 'hg-v1';
-const SHELL = ['/', '/get-help', '/offline', '/assets/css/styles.css', '/assets/js/main.js', '/assets/js/panic.js', '/assets/img/logo-sm.jpg', '/assets/img/logo.jpg', '/assets/img/icon-192.png'];
+const VERSION = 'hg-v2';
+const SHELL = ['/', '/get-help', '/offline', '/assets/css/styles.css', '/assets/js/main.js', '/assets/js/panic.js', '/assets/js/butterflies.js', '/assets/img/logo-sm.jpg', '/assets/img/logo.jpg', '/assets/img/icon-192.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -275,3 +275,34 @@ strong { font-weight: 500; }
 .site-footer__legal { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--muted); text-align: right; }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; } }
+
+/* ---------- Founder band (home) ---------- */
+.founder { position: relative; overflow: hidden; color: #fff; text-align: center; background: radial-gradient(ellipse at 50% 0%, #b0176a 0%, var(--pink-900) 45%, #3d0620 100%); padding: clamp(3rem, 7vw, 5.5rem) 0; }
+.founder::before { content: ""; position: absolute; inset: -40%; background: conic-gradient(from 0deg, transparent 0 10deg, rgba(255,230,160,0.10) 12deg, transparent 14deg 30deg, rgba(255,230,160,0.10) 32deg, transparent 34deg 50deg, rgba(255,230,160,0.10) 52deg, transparent 54deg 70deg, rgba(255,230,160,0.10) 72deg, transparent 74deg 90deg, rgba(255,230,160,0.10) 92deg, transparent 94deg 110deg, rgba(255,230,160,0.10) 112deg, transparent 114deg 130deg, rgba(255,230,160,0.10) 132deg, transparent 134deg 150deg, rgba(255,230,160,0.10) 152deg, transparent 154deg 170deg, rgba(255,230,160,0.10) 172deg, transparent 174deg 190deg, rgba(255,230,160,0.10) 192deg, transparent 194deg 210deg, rgba(255,230,160,0.10) 212deg, transparent 214deg 230deg, rgba(255,230,160,0.10) 232deg, transparent 234deg 250deg, rgba(255,230,160,0.10) 252deg, transparent 254deg 270deg, rgba(255,230,160,0.10) 272deg, transparent 274deg 290deg, rgba(255,230,160,0.10) 292deg, transparent 294deg 310deg, rgba(255,230,160,0.10) 312deg, transparent 314deg 330deg, rgba(255,230,160,0.10) 332deg, transparent 334deg 350deg, rgba(255,230,160,0.10) 352deg, transparent 354deg 360deg); animation: founder-rays 90s linear infinite; }
+@keyframes founder-rays { to { transform: rotate(360deg); } }
+.founder__inner { position: relative; display: grid; justify-items: center; gap: 0.5rem; }
+.founder__eyebrow { text-transform: uppercase; letter-spacing: 0.4em; font-size: 0.85rem; font-weight: 500; color: #ffd27a; margin: 0; }
+.founder__eyebrow::before, .founder__eyebrow::after { content: "\2726"; margin: 0 0.75rem; opacity: 0.8; }
+.founder__name { font-size: clamp(3.2rem, 10vw, 6.5rem); font-weight: 500; line-height: 1; margin: 0.25rem 0 0; letter-spacing: 0.08em; background: linear-gradient(100deg, #f9e7b0 0%, #ffd27a 25%, #fff6d6 50%, #d9a21b 75%, #f9e7b0 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: founder-shimmer 6s linear infinite; text-shadow: none; filter: drop-shadow(0 0 18px rgba(255,210,122,0.35)); }
+@keyframes founder-shimmer { to { background-position: 200% center; } }
+.founder__sub { font-size: clamp(1.15rem, 2.6vw, 1.7rem); font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; margin: 0.5rem 0 0; color: #fff; }
+.founder__rule { width: min(260px, 60vw); height: 1px; margin: 1.1rem auto; background: linear-gradient(90deg, transparent, #ffd27a, transparent); }
+.founder__verse { max-width: 46ch; margin: 0; font-style: italic; font-size: 1.05rem; opacity: 0.95; }
+.founder__verse cite { display: block; font-style: normal; font-size: 0.85rem; letter-spacing: 0.14em; text-transform: uppercase; color: #ffd27a; margin-top: 0.4rem; }
+@media (prefers-reduced-motion: reduce) { .founder::before, .founder__name { animation: none; } }
+
+/* ---------- Butterflies ---------- */
+.butterflies { position: fixed; inset: 0; pointer-events: none; z-index: 850; overflow: hidden; }
+.butterfly { position: absolute; left: var(--x); top: var(--y); width: var(--size); opacity: 0.95; animation: butterfly-drift var(--drift) ease-in-out var(--delay) infinite alternate; filter: drop-shadow(0 3px 5px rgba(43,26,36,0.35)); }
+.butterfly svg { display: block; overflow: visible; }
+.butterfly .wing { transform-origin: 32px 26px; animation: butterfly-flap var(--flap) ease-in-out infinite alternate; }
+.butterfly .wing--l { animation-name: butterfly-flap-l; }
+@keyframes butterfly-flap { from { transform: rotateY(0deg); } to { transform: rotateY(65deg); } }
+@keyframes butterfly-flap-l { from { transform: rotateY(0deg); } to { transform: rotateY(-65deg); } }
+@keyframes butterfly-drift { 0% { transform: translate(0, 0) rotate(-8deg); } 25% { transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * -0.6)) rotate(6deg); } 50% { transform: translate(calc(var(--dx) * 0.7), calc(var(--dy) * 0.3)) rotate(-5deg); } 75% { transform: translate(calc(var(--dx) * 0.9), calc(var(--dy) * -0.2)) rotate(8deg); } 100% { transform: translate(var(--dx), var(--dy)) rotate(-6deg); } }
+@media print { .butterflies { display: none; } }
+
+/* ---------- Legal / long-form pages ---------- */
+.prose { max-width: 72ch; }
+.sample-msg { font-family: ui-monospace, Menlo, monospace; white-space: pre-wrap; background: #fdf2f7; padding: 1rem; border: 1px solid var(--line); }
+.mt-0 { margin-top: 0; }
