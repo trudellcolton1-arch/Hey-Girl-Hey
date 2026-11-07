@@ -1,0 +1,142 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//HEY GIRL//2027 Calendar//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:HEY GIRL 2027
+BEGIN:VTIMEZONE
+TZID:America/Chicago
+BEGIN:STANDARD
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0600
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+TZOFFSETFROM:-0600
+TZOFFSETTO:-0500
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:heygirl-2027-0116@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270116T100000
+DTEND;TZID=America/Chicago:20270116T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0220@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270220T100000
+DTEND;TZID=America/Chicago:20270220T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0320@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270320T100000
+DTEND;TZID=America/Chicago:20270320T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0417@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270417T100000
+DTEND;TZID=America/Chicago:20270417T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0515@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270515T100000
+DTEND;TZID=America/Chicago:20270515T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0612@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;VALUE=DATE:20270612
+DTEND;VALUE=DATE:20270613
+SUMMARY:HEY GIRL: Purity & Purpose, All White Gala Ball
+DESCRIPTION:Special occasion. Time and details to be announced. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0717@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270717T100000
+DTEND;TZID=America/Chicago:20270717T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0821@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270821T100000
+DTEND;TZID=America/Chicago:20270821T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0918@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20270918T100000
+DTEND;TZID=America/Chicago:20270918T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-1016@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;TZID=America/Chicago:20271016T100000
+DTEND;TZID=America/Chicago:20271016T120000
+SUMMARY:HEY GIRL: Monthly meeting
+LOCATION:Flemmings Center
+DESCRIPTION:H.E.Y. G.I.R.L. the Movement monthly meeting. Subject to change. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-1120@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;VALUE=DATE:20271120
+DTEND;VALUE=DATE:20271121
+SUMMARY:HEY GIRL: Thanksgiving celebration
+DESCRIPTION:Special occasion. Time and details to be announced. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-1219@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;VALUE=DATE:20271219
+DTEND;VALUE=DATE:20271220
+SUMMARY:HEY GIRL: Christmas celebration
+DESCRIPTION:Special occasion. Time and details to be announced. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0619@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;VALUE=DATE:20270619
+DTEND;VALUE=DATE:20270620
+SUMMARY:HEY GIRL: Parade
+DESCRIPTION:Special occasion. Time and details to be announced. hghey.org/programs
+END:VEVENT
+BEGIN:VEVENT
+UID:heygirl-2027-0725@hghey.org
+DTSTAMP:20261107T000000Z
+DTSTART;VALUE=DATE:20270725
+DTEND;VALUE=DATE:20270726
+SUMMARY:HEY GIRL: Skate Escape
+DESCRIPTION:Special occasion. Time and details to be announced. hghey.org/programs
+END:VEVENT
+END:VCALENDAR
