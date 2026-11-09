@@ -1,30 +1,65 @@
-/* Hey Girl butterflies. Decorative, pointer-events none, skipped when the user prefers reduced motion. */
+/* Hey Girl butterflies — the real butterflies from the H.E.Y. G.I.R.L. logo artwork,
+   cut out of /assets/img/logo.jpg with transparent backgrounds and animated with CSS.
+   Each butterfly is two wing-half images (split along the body) that flap in 3D,
+   while the whole butterfly drifts on a gentle flight path.
+   Decorative only: pointer-events none, skipped entirely when the user prefers reduced motion. */
 (function () {
+  'use strict';
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var BASE = '/assets/img/butterflies/';
+  /* Natural sizes of the cutout masters (left half + right half, split at the body). */
+  var VARIANTS = {
+    pink: { ar: '263 / 223', w: 132, h: 223 },
+    teal: { ar: '143 / 155', w: 72,  h: 155 },
+    gold: { ar: '113 / 127', w: 57,  h: 127 }
+  };
+
+  function half(variant, side) {
+    var v = VARIANTS[variant];
+    var file = variant + '-' + side;
+    return '<picture class="bfly__w bfly__w--' + side + '">' +
+      '<source type="image/webp" srcset="' + BASE + file + '.webp">' +
+      '<img src="' + BASE + file + '.png" alt="" width="' + v.w + '" height="' + v.h + '" decoding="async">' +
+      '</picture>';
+  }
+
+  function build(variant) {
+    var b = document.createElement('div');
+    b.className = 'bfly';
+    b.innerHTML = half(variant, 'l') + half(variant, 'r');
+    b.style.setProperty('--ar', VARIANTS[variant].ar);
+    return b;
+  }
+
+  var isHome = !!document.querySelector('main .hero');
   var small = window.innerWidth < 700;
-  var count = small ? 4 : 7;
-  var colors = [['#ffd27a', '#d9a21b'], ['#ffffff', '#f4b6d4'], ['#8fd9e3', '#1aa3b5'], ['#ffe6f2', '#e68ab8'], ['#ffd27a', '#f0479c'], ['#b9ecf2', '#1aa3b5']];
+  /* Elegant, not cluttered: a modest flock on the home page, a subtler one elsewhere. */
+  var count = isHome ? (small ? 5 : 7) : (small ? 2 : 4);
+  var order = ['pink', 'gold', 'teal', 'pink', 'teal', 'gold', 'pink'];
+
   var layer = document.createElement('div');
   layer.className = 'butterflies';
   layer.setAttribute('aria-hidden', 'true');
+
   for (var i = 0; i < count; i++) {
-    var c = colors[i % colors.length];
-    var b = document.createElement('div');
-    b.className = 'butterfly';
-    var size = 30 + Math.round(Math.random() * 24);
+    var variant = order[i % order.length];
+    var b = build(variant);
+    var big = variant === 'pink';
+    var min = (isHome ? (big ? 44 : 34) : (big ? 34 : 26));
+    var max = (isHome ? (big ? (small ? 64 : 76) : (small ? 46 : 56)) : (big ? 46 : 36));
+    var size = Math.round(min + Math.random() * (max - min));
+    var heroZone = isHome && i < 3; /* let a few start around the hero */
     b.style.setProperty('--size', size + 'px');
-    b.style.setProperty('--x', (5 + Math.random() * 90) + 'vw');
-    b.style.setProperty('--y', (10 + Math.random() * 80) + 'vh');
-    b.style.setProperty('--dx', ((Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 25)) + 'vw');
-    b.style.setProperty('--dy', ((Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 20)) + 'vh');
-    b.style.setProperty('--drift', (18 + Math.random() * 16) + 's');
-    b.style.setProperty('--flap', (0.35 + Math.random() * 0.25) + 's');
-    b.style.setProperty('--delay', (-Math.random() * 20) + 's');
-    b.innerHTML =
-      '<svg viewBox="0 0 64 48" width="' + size + '" height="' + Math.round(size * 0.75) + '">' +
-      '<g class="wing wing--l"><path d="M31 24 C22 2 2 2 4 18 C5 28 18 30 31 24 Z" fill="' + c[0] + '" stroke="#9c0f55" stroke-width="1.5" stroke-linejoin="round"/><path d="M31 26 C20 34 6 44 10 46 C18 48 28 36 31 26 Z" fill="' + c[1] + '" stroke="#9c0f55" stroke-width="1.5" stroke-linejoin="round"/></g>' +
-      '<g class="wing wing--r"><path d="M33 24 C42 2 62 2 60 18 C59 28 46 30 33 24 Z" fill="' + c[0] + '" stroke="#9c0f55" stroke-width="1.5" stroke-linejoin="round"/><path d="M33 26 C44 34 58 44 54 46 C46 48 36 36 33 26 Z" fill="' + c[1] + '" stroke="#9c0f55" stroke-width="1.5" stroke-linejoin="round"/></g>' +
-      '<ellipse cx="32" cy="26" rx="2" ry="9" fill="#5c2a44"/></svg>';
+    b.style.setProperty('--x', (4 + Math.random() * 84) + 'vw');
+    b.style.setProperty('--y', (heroZone ? 8 + Math.random() * 40 : 15 + Math.random() * 70) + 'vh');
+    b.style.setProperty('--dx', ((Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 22)) + 'vw');
+    b.style.setProperty('--dy', ((Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 18)) + 'vh');
+    b.style.setProperty('--drift', (22 + Math.random() * 16) + 's');
+    b.style.setProperty('--flap', (0.55 + Math.random() * 0.35) + 's');
+    b.style.setProperty('--delay', (-Math.random() * 30) + 's');
+    b.style.setProperty('--sx', Math.random() < 0.4 ? '-1' : '1'); /* some face the other way */
+    b.style.setProperty('--o', isHome ? '0.95' : '0.8');
     layer.appendChild(b);
   }
   document.body.appendChild(layer);
