@@ -309,6 +309,22 @@ strong { font-weight: 500; }
 @keyframes bfly-drift { 0% { transform: translate(0, 0) rotate(-7deg) scaleX(var(--sx, 1)); } 25% { transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * -0.6)) rotate(5deg) scaleX(var(--sx, 1)); } 50% { transform: translate(calc(var(--dx) * 0.7), calc(var(--dy) * 0.3)) rotate(-4deg) scaleX(var(--sx, 1)); } 75% { transform: translate(calc(var(--dx) * 0.9), calc(var(--dy) * -0.2)) rotate(7deg) scaleX(var(--sx, 1)); } 100% { transform: translate(var(--dx), var(--dy)) rotate(-5deg) scaleX(var(--sx, 1)); } }
 @media print, (prefers-reduced-motion: reduce) { .butterflies { display: none; } }
 
+/* ---------- Upcoming event (home) ---------- */
+.event { background: var(--pink-50); border-top: 4px solid var(--gold-500); border-bottom: 1px solid var(--line); }
+.event__inner { display: grid; gap: 2.25rem; align-items: center; justify-items: center; }
+@media (min-width: 900px) { .event__inner { grid-template-columns: minmax(280px, 400px) 1fr; gap: 3.5rem; justify-items: start; } }
+.event__flyer { display: block; width: min(380px, 100%); text-decoration: none; }
+.event__flyer img { border: 1px solid var(--line); box-shadow: 0 14px 40px rgba(192,20,106,0.18); transition: transform 0.2s; }
+.event__flyer:hover img, .event__flyer:focus-visible img { transform: scale(1.015); }
+.event__zoom { display: block; text-align: center; margin-top: 0.6rem; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal-500); font-weight: 500; }
+.event__details { max-width: 56ch; }
+.event__badge { display: inline-block; margin: 0 0 1rem; padding: 0.3rem 0.9rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #5c4506; background: linear-gradient(100deg, #f9e7b0, #ffd27a); border: 1px solid var(--gold-500); }
+.event__meta { list-style: none; margin: 0 0 1.25rem; padding: 0; display: grid; gap: 0.5rem; }
+.event__meta li { padding-left: 1.4rem; position: relative; font-size: 1.05rem; }
+.event__meta li::before { content: "\2726"; position: absolute; left: 0; color: var(--teal-500); }
+.event__rides { border-left: 3px solid var(--teal-500); background: #fff; padding: 0.9rem 1.1rem; margin-bottom: 0; }
+@media (max-width: 899px) { .event__details { text-align: center; } .event__meta li { text-align: left; } .event__rides { text-align: left; } }
+
 /* ---------- Legal / long-form pages ---------- */
 .prose { max-width: 72ch; }
 .sample-msg { font-family: ui-monospace, Menlo, monospace; white-space: pre-wrap; background: #fdf2f7; padding: 1rem; border: 1px solid var(--line); }
